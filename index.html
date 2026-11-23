@@ -159,7 +159,7 @@ footer{border-top:1px solid var(--line);padding:28px max(5vw,16px) 40px;font-siz
 footer .wrap{display:flex;flex-wrap:wrap;gap:10px 32px;justify-content:space-between}
 @media(max-width:900px){.story{grid-template-columns:minmax(0,1fr)}.pin{top:52px;height:auto;padding:12px 0;z-index:2;background:linear-gradient(#000 85%,transparent)}.beat{min-height:60vh;max-width:none}.bento{grid-template-columns:repeat(2,minmax(0,1fr))}.w3,.w2,.w4{grid-column:span 2}.plans{grid-template-columns:minmax(0,1fr);max-width:520px;margin-inline:auto}.cgrid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){.links a:not(.pill){display:none}.strip{grid-template-columns:minmax(0,1fr)}.row2{grid-template-columns:minmax(0,1fr)}.note.far{display:none}.tile{min-height:220px}#n1{left:10px!important;top:6%!important}#n3{left:auto!important;right:10px;top:78%!important}}
-@media(max-width:900px){.pin{order:-1}}
+@media(max-width:900px){.pin{order:-1;position:static;top:auto;height:auto;padding:8px 0 24px;background:none;z-index:auto;overflow:hidden}.beat{min-height:0;opacity:1;padding:28px 0;border-top:1px solid var(--line)}.beat.on .k{text-decoration:underline;text-underline-offset:6px}}
 @media(prefers-reduced-motion:reduce){.phone,.note,.plan,.scr,.beat{transition:none}}
 </style>
 </head>
@@ -357,8 +357,12 @@ const beats=[...document.querySelectorAll('.beat')],scrs=[...sp.querySelectorAll
 const POSE=[[-18,6],[16,4],[-10,-3],[20,6]];
 const show=i=>{beats.forEach((b,j)=>b.classList.toggle('on',j===i));scrs.forEach((s,j)=>s.classList.toggle('off',j!==i));const [ry,rx]=reduce?[0,0]:POSE[i];sp.style.transition='transform .9s cubic-bezier(.2,.7,.2,1)';sp.style.setProperty('--ry',ry+'deg');sp.style.setProperty('--rx',rx+'deg')};
 show(0);
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)show(+e.target.dataset.i)}),{rootMargin:'-45% 0px -45% 0px'});
+const narrow=matchMedia('(max-width:900px)');let cur=0,cyc=null;
+const show2=i=>{cur=i;show(i)};
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&!narrow.matches)show2(+e.target.dataset.i)}),{rootMargin:'-45% 0px -45% 0px'});
 beats.forEach(b=>io.observe(b));
+const mode=()=>{clearInterval(cyc);cyc=null;if(narrow.matches)cyc=setInterval(()=>show2((cur+1)%beats.length),3500)};
+narrow.addEventListener?narrow.addEventListener('change',mode):narrow.addListener(mode);mode();
 
 /* content */
 document.getElementById('trades').innerHTML=['Roofers','Plumbers','HVAC','Electricians','Landscapers','Painters','Auto repair','Detailers','Barbers and salons','Cleaners','Restaurants','Contractors'].map(t=>`<span>${t}</span>`).join('');
